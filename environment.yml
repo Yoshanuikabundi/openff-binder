@@ -1,0 +1,52 @@
+# Defines the conda environment for the docker image
+name: openff-docker
+version: 0.0.1
+channels:
+  - openeye
+  - conda-forge
+  - psi4
+  - defaults
+dependencies:
+  # Runtime
+  - python >=3.8
+  - jupyter
+  - jupyterlab
+  - nbgitpuller
+  # Package management
+  - conda
+  - mamba
+  - pip
+  # OpenFF Stack
+  - openff-toolkit
+  - openff-interchange
+  - openff-forcefields
+  - openff-bespokefit
+  - openff-qcsubmit
+  - openff-fragmenter
+  - openff-evaluator
+  - openff-recharge
+  - openff-units
+  # Cheminformatics toolkits
+  - openeye-toolkits
+  - rdkit
+  - ambertools
+  # MD engines
+  - gromacs
+  - openmm >= 7.6
+  - lammps
+  # QC engines
+  - xtb-python
+  - torchani
+  - psi4
+  # QC Archive
+  - qcelemental
+  - qcportal
+  - qcengine
+  - qcfractal
+  # Utilities
+  - mdtraj
+  - numpy
+  - scipy
+  - pandas
+  - nglview
+  - openmmforcefields
