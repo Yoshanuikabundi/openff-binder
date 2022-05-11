@@ -8,6 +8,9 @@ on:
     branches:
       - main
     types: [opened, edited, synchronize, reopened]
+  release:
+    types: [published]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,20 +26,29 @@ jobs:
         NO_PUSH: true
         MYBINDERORG_TAG: ${{ github.event.ref }}
 
-    - name: comment on PR with Binder link
+    - name: Get current time
       if: success() && github.event_name == 'pull_request'
-      uses: actions/github-script@v1
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        script: |
-          var BRANCH_NAME = process.env.BRANCH_NAME;
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: `[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/${context.repo.owner}/${context.repo.repo}/${BRANCH_NAME}?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252Fopenforcefield%252Fopenff-toolkit%26urlpath%3Dlab%252Ftree%252Fopenff-toolkit%252Fexamples%26branch%3Dmain) :point_left: Launch a binder notebook on this branch`
-          })
-      env:
-        BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+      id: time
+      run: echo "::set-output name=time::$(date)"
 
+    - name: Find Comment
+      if: success() && github.event_name == 'pull_request'
+      uses: peter-evans/find-comment@v2
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: Binder cache updated at
+
+    - name: Create or update comment
+      if: success() && github.event_name == 'pull_request'
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          Binder cache updated at ${{ steps.time.outputs.time }}
+
+          [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/${{ context.repo.owner}}/${{ context.repo.repo }}/${{ github.event.pull_request.head.ref }}?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252Fopenforcefield%252Fopenff-toolkit%26urlpath%3Dlab%252Ftree%252Fopenff-toolkit%252Fexamples%26branch%3Dmain) :point_left: Launch a binder notebook on this branch
+        edit-mode: replace
 
