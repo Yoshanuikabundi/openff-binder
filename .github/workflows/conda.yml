@@ -1,7 +1,6 @@
 name: Build Conda single-file installer
 
 on:
-
   pull_request:
     branches:
       - main
@@ -30,9 +29,9 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       name: Install dependencies
       with:
-        auto-activate-base: false
-        activate-environment: constructor
         environment-file: devtools/conda-envs/constructor.yml
+        activate-environment: constructor
+        auto-activate-base: false
         miniforge-version: latest
         miniforge-variant: Mambaforge
         use-mamba: true
