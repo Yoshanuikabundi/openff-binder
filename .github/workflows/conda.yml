@@ -38,7 +38,6 @@ jobs:
 
     - name: Set up libmamba
       run: |
-        mamba install -c conda-forge constructor pyyaml
         conda config --set experimental_solver libmamba
 
     - name: Describe environment
@@ -76,5 +75,5 @@ jobs:
 
     - name: Run constructor
       run: |
-        constructor constructor --output-dir constructor --conda-exe $(which mamba) --platform '${{ matrix.platform }}'
+        /usr/share/miniconda3/envs/constructor/bin/constructor constructor --output-dir constructor --conda-exe $(which mamba) --platform '${{ matrix.platform }}'
 
