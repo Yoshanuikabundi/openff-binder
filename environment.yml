@@ -1,5 +1,5 @@
 # Defines the conda environment for the docker image
-name: openff-docker
+name: openff-binder
 version: 0.0.1
 channels:
   - openeye
