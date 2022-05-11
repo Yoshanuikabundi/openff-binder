@@ -46,7 +46,6 @@ jobs:
         ls
         conda env list
         conda list
-        conda list -n openff-docker
 
     - name: Create constructor input files
       shell: python
