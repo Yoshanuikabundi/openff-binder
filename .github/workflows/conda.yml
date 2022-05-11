@@ -30,8 +30,8 @@ jobs:
     - uses: conda-incubator/setup-miniconda@v2
       name: Install dependencies
       with:
-        # environment-file: devtools/conda-envs/constructor.yml
-        # activate-environment: constructor
+        environment-file: devtools/conda-envs/constructor.yml
+        activate-environment: constructor
         auto-activate-base: true
         miniforge-version: latest
         miniforge-variant: Mambaforge
@@ -39,7 +39,6 @@ jobs:
 
     - name: Set up libmamba
       run: |
-        mamba install -c conda-forge constructor pyyaml
         conda config --env --set experimental_solver libmamba
 
     - name: Describe environment
