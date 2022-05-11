@@ -31,11 +31,12 @@ jobs:
       name: Install dependencies
       with:
         auto-activate-base: true
+        activate-environment: ""
         miniforge-version: latest
         miniforge-variant: Mambaforge
         use-mamba: true
 
-    - name: Install setup base environment
+    - name: Install dependencies
       run: |
         mamba install constructor pyyaml
         conda config --set experimental_solver libmamba
@@ -75,9 +76,5 @@ jobs:
 
     - name: Run constructor
       run: |
-        constructor                   \
-          constructor                 \
-          --output-dir constructor    \
-          --conda-exe $(which mamba)  \
-          --platform '${{ matrix.platform }}'
+        constructor constructor/${{ matrix.platform }} --output-dir constructor --conda-exe $(which mamba) --platform '${{ matrix.platform }}'
 
