@@ -76,5 +76,6 @@ jobs:
 
     - name: Run constructor
       run: |
-        $CONDA/envs/constructor/bin/constructor constructor --output-dir constructor --conda-exe $(which mamba) --platform '${{ matrix.platform }}'
+        export CONDA_EXE=$(which mamba)
+        $CONDA/envs/constructor/bin/constructor constructor --output-dir constructor --platform '${{ matrix.platform }}'
 
