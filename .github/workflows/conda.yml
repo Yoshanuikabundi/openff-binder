@@ -1,0 +1,84 @@
+name: Build Conda single-file installer
+
+on:
+
+  pull_request:
+    branches:
+      - main
+    types: [opened, edited, synchronize, reopened]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  setup:
+    strategy:
+      matrix:
+        platform: ["linux-64", "osx-arm64", "osx-64", "win-64"]
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: checkout files in repo
+      uses: actions/checkout@v3
+
+    - name: Cache conda
+      uses: actions/cache@v3.0.2
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{hashFiles('environment.yml') }}
+
+    - uses: conda-incubator/setup-miniconda@v2
+      name: Install dependencies
+      with:
+        auto-activate-base: true
+        miniforge-version: latest
+        miniforge-variant: Mambaforge
+        use-mamba: true
+
+    - name: Install setup base environment
+      run: |
+        mamba install constructor pyyaml
+        conda config --set experimental_solver libmamba
+
+    - name: Describe environment
+      run: |
+        pwd
+        ls
+        conda env list
+        conda list
+        conda list -n openff-docker
+
+    - name: Create constructor input files
+      shell: python
+      run: |
+        import os
+        from pathlib import Path
+        import yaml
+
+        with open("environment.yml", "r") as f:
+          env = yaml.load(f, yaml.Loader)
+
+        construct = {
+          "name": "openff",
+          "version": env["version"],
+          "environment_file": "../environment.yml",
+          "write_condarc": True,
+          "channels": env["channels"],
+          # "welcome_image": "../images/welcome.png" # 164 x 314px
+          # "header_image": "../images/header.png" # 150 x 57px
+          # "icon_image": "../images/icon.png" # 255 x 255px
+        }
+
+        path = Path("constructor") / "${{ matrix.platform }}"
+        path.mkdir(parents=True, exist_ok=True)
+        with open(path / "construct.yaml", "w") as f:
+          yaml.dump(construct, f)
+
+    - name: Run constructor
+      run: |
+        constructor                   \
+          constructor                 \
+          --output-dir constructor    \
+          --conda-exe $(which mamba)  \
+          --platform '${{ matrix.platform }}'
+

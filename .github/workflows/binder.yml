@@ -1,0 +1,42 @@
+name: Build Notebook Container
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: checkout files in repo
+      uses: actions/checkout@v3
+
+    - name: cache binder build on mybinder.org
+      uses: jupyterhub/repo2docker-action@master
+      with:
+        NO_PUSH: true
+        MYBINDERORG_TAG: ${{ github.event.ref }}
+
+    - name: comment on PR with Binder link
+      if: success() && github.event_name == 'pull_request'
+      uses: actions/github-script@v1
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          var BRANCH_NAME = process.env.BRANCH_NAME;
+          github.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/${context.repo.owner}/${context.repo.repo}/${BRANCH_NAME}?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252Fopenforcefield%252Fopenff-toolkit%26urlpath%3Dlab%252Ftree%252Fopenff-toolkit%252Fexamples%26branch%3Dmain) :point_left: Launch a binder notebook on this branch`
+          })
+      env:
+        BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
+
+
