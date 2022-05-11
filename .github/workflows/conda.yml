@@ -37,7 +37,9 @@ jobs:
         use-mamba: true
 
     - name: Set up libmamba
-      run: conda config --set experimental_solver libmamba
+      run: |
+        mamba activate constructor
+        conda config --set experimental_solver libmamba
 
     - name: Describe environment
       run: |
