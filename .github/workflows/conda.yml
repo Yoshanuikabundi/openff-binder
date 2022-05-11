@@ -76,5 +76,5 @@ jobs:
 
     - name: Run constructor
       run: |
-        /usr/share/miniconda3/bin/constructor constructor --output-dir constructor --conda-exe $(which mamba) --platform '${{ matrix.platform }}'
+        $CONDA/envs/constructor/bin/constructor constructor --output-dir constructor --conda-exe $(which mamba) --platform '${{ matrix.platform }}'
 
