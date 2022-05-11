@@ -38,7 +38,7 @@ jobs:
 
     - name: Set up libmamba
       run: |
-        conda activate constructor
+        mamba install -c conda-forge constructor pyyaml
         conda config --set experimental_solver libmamba
 
     - name: Describe environment
