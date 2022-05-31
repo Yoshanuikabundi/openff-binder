@@ -66,7 +66,7 @@ jobs:
         with open("environment.yml", "r") as f:
           env = yaml.load(f, yaml.Loader)
 
-        if ${{matrix.platform}}.startswith("win"):
+        if "${{matrix.platform}}".startswith("win"):
           installer_type = "exe"
         else:
           installer_type = "sh"
