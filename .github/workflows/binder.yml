@@ -29,6 +29,8 @@ jobs:
     - name: Report URL
       if: success() && github.event_name == 'pull_request'
       continue-on-error: True
+      permissions:
+        statuses: write 
       uses: Sibz/github-status-action@v1
       with: 
         authToken: ${{secrets.GITHUB_TOKEN}}
