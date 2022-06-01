@@ -1,5 +1,5 @@
 # Defines the conda environment for the docker image
-name: openff-docker
+name: openff
 version: 0.0.1
 channels:
   - openeye
@@ -8,7 +8,7 @@ channels:
   - defaults
 dependencies:
   # Runtime
-  - python >=3.8
+  - python >=3.8,<3.10
   - jupyter
   - jupyterlab
   - nbgitpuller
@@ -33,7 +33,7 @@ dependencies:
   # MD engines
   - gromacs
   - openmm >= 7.6
-  - lammps
+  # - lammps # Doesn't work on Mac
   # QC engines
   - xtb-python
   - torchani

@@ -1,0 +1,11 @@
+name: constructor
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python
+  - pip
+  - conda
+  - mamba
+  - pyyaml
+  - constructor

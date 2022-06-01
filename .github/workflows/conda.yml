@@ -1,0 +1,106 @@
+name: Build Conda single-file installer
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  constructor:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ["linux-64", "osx-64"]
+        experimental: [false]
+        include:
+          - platform: "osx-arm64"
+            experimental: true
+          - platform: "win-64"
+            experimental: true
+    continue-on-error: ${{ matrix.experimental }}
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: checkout files in repo
+      uses: actions/checkout@v3
+
+    - name: Cache conda
+      uses: actions/cache@v3.0.2
+      with:
+        path: ~/conda_pkgs_dir
+        key: ${{ runner.os }}-conda-${{hashFiles('environment.yml') }}
+
+    - uses: conda-incubator/setup-miniconda@v2
+      name: Install dependencies
+      with:
+        environment-file: devtools/conda-envs/constructor.yml
+        activate-environment: constructor
+        auto-activate-base: false
+        miniforge-version: latest
+        miniforge-variant: Mambaforge
+        use-mamba: true
+
+    - name: Set up libmamba
+      run: |
+        conda config --env --set experimental_solver libmamba
+
+    - name: Describe environment
+      run: |
+        pwd
+        ls
+        conda env list
+        conda list
+
+    - name: Create constructor input files
+      id: config
+      shell: python
+      run: |
+        import os
+        from pathlib import Path
+        import yaml
+
+        with open("environment.yml", "r") as f:
+          env = yaml.load(f, yaml.Loader)
+
+        if "${{matrix.platform}}".startswith("win"):
+          installer_type = "exe"
+        else:
+          installer_type = "sh"
+
+        construct = {
+          "installer_filename": f"{env['name']}-{env['version']}-${{matrix.platform}}.{installer_type}",
+          "installer_type": installer_type,
+          "name": env["name"],
+          "version": env["version"],
+          "environment_file": "../environment.yml",
+          "write_condarc": True,
+          "channels": env["channels"],
+          "icon_image": "../images/icon.png" # 255 x 255px
+        }
+
+        print("::set-output name=installer_filename::", construct["installer_filename"], sep="")
+
+        path = Path("constructor")
+        path.mkdir(parents=True, exist_ok=True)
+        with open(path / "construct.yaml", "w") as f:
+          yaml.dump(construct, f)
+
+    - name: Run constructor
+      run: |
+        export CONDA_EXE=$(which mamba)
+        $CONDA/envs/constructor/bin/constructor constructor --output-dir constructor --conda-exe $CONDA_EXE --platform '${{ matrix.platform }}'
+
+    - name: Reveal products
+      run: |
+        ls constructor
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.platform }}-constructor
+        path: constructor/${{ steps.config.outputs.installer_filename }}
+        retention-days: 5
